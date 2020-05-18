@@ -1,4 +1,7 @@
-function createVideoCard(videoReq) {
+const listOfVideoReqs = document.getElementById("listOfRequests");
+const videoReqForm = document.getElementById("video-request-form");
+
+function createVideoCard(videoReq, isPrepend = false) {
     const videoForm = `<div class="card mb-3">
                     <div class="card-body d-flex justify-content-between flex-row">
                     <div class="d-flex flex-column">
@@ -7,14 +10,14 @@ function createVideoCard(videoReq) {
                         <p class="mb-0 text-muted">
                         ${
 
-                            videoReq.expected_result &&`<strong>Expected results:</strong>${videoReq.expected_result}`
-                        }
+        videoReq.expected_result && `<strong>Expected results:</strong>${videoReq.expected_result}`
+        }
                         </p>
                     </div>
                     <div class="d-flex flex-column text-center">
-                        <a class="btn btn-link">🔺</a>
-                        <h3>${videoReq.votes.ups - videoReq.votes.downs}</h3>
-                        <a class="btn btn-link">🔻</a>
+                        <a id = ${`vote_up_` + videoReq._id} class="btn btn-link">🔺</a>
+                        <h3 id = ${`vote_score_` + videoReq._id}>${videoReq.votes.ups - videoReq.votes.downs}</h3>
+                        <a id = ${`vote_down_` + videoReq._id} class="btn btn-link">🔻</a>
                     </div>
                     </div>
                     <div class="card-footer d-flex flex-row justify-content-between">
@@ -33,31 +36,67 @@ function createVideoCard(videoReq) {
                 `
     let div = document.createElement('div');
     div.innerHTML = videoForm;
-    return div;
+
+    if (isPrepend)
+        listOfVideoReqs.prepend(div);
+    else
+        listOfVideoReqs.appendChild(div);
+
+    const voteUp = document.getElementById('vote_up_' + videoReq._id);
+    const voteDown = document.getElementById('vote_down_' + videoReq._id);
+    const voteScore = document.getElementById('vote_score_' + videoReq._id);
+
+    voteUp.addEventListener('click', () => {
+        fetch("http://127.0.0.1:7777/video-request/vote", {
+            method: 'PUT',
+            headers: {
+                'content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: videoReq._id, vote_type: 'ups' })
+        }).then(res => res.json()).
+            then(data => voteScore.innerText = data.votes.ups - data.votes.downs)
+    });
+    voteDown.addEventListener('click', () => {
+        fetch("http://127.0.0.1:7777/video-request/vote", {
+            method: 'PUT',
+            headers: {
+                'content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: videoReq._id, vote_type: 'downs' })
+        }).then(res => res.json()).
+            then(data => voteScore.innerText = data.votes.ups - data.votes.downs)
+    });
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const listOfVideoReqs = document.getElementById("listOfRequests")
+
+function renderVideoRequests() {
     fetch("http://127.0.0.1:7777/video-request").
         then((res) => res.json()).
         then(data => {
             data.forEach(videoReq => {
-                listOfVideoReqs.appendChild(createVideoCard(videoReq));
+                createVideoCard(videoReq);
             });
         })
+}
 
-    const videoReqForm = document.getElementById("video-request-form");
-    console.log(videoReqForm)
+function sendVideoRequest() {
+
+    const data = new FormData(videoReqForm);
+    fetch("http://127.0.0.1:7777/video-request", {
+        method: 'POST',
+        body: data,
+    }).then(res => res.json())
+        .then(data => {
+            createVideoCard(data, isPrepend = true)
+        })
+        .catch(e => console.log(e))
+
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderVideoRequests();
+    
     videoReqForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        const data = new FormData(videoReqForm);
-        fetch("http://127.0.0.1:7777/video-request", {
-            method: 'POST',
-            body: data,
-        }).then(res => res.json())
-            .then(data => {
-                listOfVideoReqs.prepend(createVideoCard(data))
-            })
-            .catch(e => console.log(e))
+        sendVideoRequest();
     })
 })
-
