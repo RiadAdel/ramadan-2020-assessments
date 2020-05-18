@@ -1,7 +1,6 @@
-const listOfVideoReqs = document.getElementById("listOfRequests");
-const videoReqForm = document.getElementById("video-request-form");
 
-function createVideoCard(videoReq, isPrepend = false) {
+
+function createVideoCard(videoReq, listOfVideoReqs, isPrepend = false) {
     const videoForm = `<div class="card mb-3">
                     <div class="card-body d-flex justify-content-between flex-row">
                     <div class="d-flex flex-column">
@@ -68,35 +67,50 @@ function createVideoCard(videoReq, isPrepend = false) {
     });
 }
 
-function renderVideoRequests() {
-    fetch("http://127.0.0.1:7777/video-request").
+function renderVideoRequests(listOfVideoReqs, sortBy = "newFirst") {
+    fetch(`http://127.0.0.1:7777/video-request?sortBy=${sortBy}`).
         then((res) => res.json()).
         then(data => {
+            listOfVideoReqs.innerHTML = "";
             data.forEach(videoReq => {
-                createVideoCard(videoReq);
+                createVideoCard(videoReq, listOfVideoReqs);
             });
         })
 }
 
-function sendVideoRequest() {
-
+function sendVideoRequest(videoReqForm, listOfVideoReqs) {
     const data = new FormData(videoReqForm);
     fetch("http://127.0.0.1:7777/video-request", {
         method: 'POST',
         body: data,
     }).then(res => res.json())
         .then(data => {
-            createVideoCard(data, isPrepend = true)
+            createVideoCard(data, listOfVideoReqs, isPrepend = true)
         })
         .catch(e => console.log(e))
 
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderVideoRequests();
-    
+    const listOfVideoReqs = document.getElementById("listOfRequests");
+    const videoReqForm = document.getElementById("video-request-form");
+    const sortByElms = document.querySelectorAll("[id*=sort-by-]");
+    renderVideoRequests(listOfVideoReqs);
+
+    sortByElms.forEach((element) => {
+        element.addEventListener('click', function (e) {
+            e.preventDefault();
+            renderVideoRequests(listOfVideoReqs, element.firstElementChild.value);
+            element.classList.add('active');
+            if (element.firstElementChild.value == "newFirst")
+                document.getElementById("sort-by-top-voted").classList.remove('active')
+            else
+                document.getElementById("sort-by-new-first").classList.remove('active')
+        })
+    })
+
     videoReqForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        sendVideoRequest();
+        sendVideoRequest(videoReqForm, listOfVideoReqs);
     })
 })
