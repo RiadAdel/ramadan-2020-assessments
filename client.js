@@ -11,6 +11,51 @@ function debounce(fun, delay) {
 
 }
 
+function isFormValid(form) {
+    const name = form.get("author_name");
+    const email = form.get("author_email");
+    const title = form.get("topic_title");
+    const details = form.get("topic_details");
+
+    if (!name.trim()) {
+        document.getElementById("author_name_feedback").innerText = "This field is required";
+        document.querySelector("[name=author_name]").classList.add("is-invalid");
+    }
+
+    const emailformat = /^((?!\.)[\w-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/
+    if (!email) {
+        document.getElementById("author_email_feedback").innerText = "This field is required";
+        document.querySelector("[name=author_email]").classList.add("is-invalid");
+    } else if (!emailformat.test(email)) {
+        document.getElementById("author_email_feedback").innerText = "Please enter valid email";
+        document.querySelector("[name=author_email]").classList.add("is-invalid");
+    }
+
+    if (!title) {
+        document.getElementById("topic_title_feedback").innerText = "This field is required";
+        document.querySelector("[name=topic_title]").classList.add("is-invalid");
+    } else if (title.length > 30) {
+        document.getElementById("topic_title_feedback").innerText = "Length most be less than 30 character";
+        document.querySelector("[name=topic_title]").classList.add("is-invalid");
+    }
+
+    if (!details) {
+        document.getElementById("topic_details_feedback").innerText = "This field is required";
+        document.querySelector("[name=topic_details]").classList.add("is-invalid")
+    }
+
+    const dataElms = document.getElementById('video-request-form').querySelectorAll('.is-invalid');
+    if (dataElms.length) {
+        dataElms.forEach(elm => {
+            elm.addEventListener('input', function () {
+                elm.classList.remove('is-invalid')
+            })
+        })
+        return false;
+    }
+    return true;
+}
+
 function createVideoCard(videoReq, listOfVideoReqs, isPrepend = false) {
     const videoForm = `<div class="card mb-3">
                     <div class="card-body d-flex justify-content-between flex-row">
@@ -88,6 +133,8 @@ function renderVideoRequests(listOfVideoReqs, sortBy = "newFirst", search = "") 
 
 function sendVideoRequest(videoReqForm, listOfVideoReqs) {
     const data = new FormData(videoReqForm);
+    if (!isFormValid(data))
+        return
     fetch("http://127.0.0.1:7777/video-request", {
         method: 'POST',
         body: data,

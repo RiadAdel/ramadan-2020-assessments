@@ -23,12 +23,14 @@
             <div class="form-group">
               <label for="author_name">Your name *</label>
               <input class="form-control" name="author_name" placeholder="Write your name here" />
+              <p id = "author_name_feedback" class="invalid-feedback"></p>
             </div>
           </div>
           <div class="col-md">
             <div class="form-group">
               <label for="author_email">Your email *</label>
               <input class="form-control" name="author_email" placeholder="Write your email here" />
+              <p id = "author_email_feedback" class="invalid-feedback"></p>
             </div>
           </div>
         </div>
@@ -36,8 +38,9 @@
         <div class="row">
           <div class="col-md">
             <div class="form-group">
-              <label for="topic_title">Topic *</label>
+              <label for="">Topic *</label>
               <input class="form-control" name="topic_title" placeholder="Write your suggested topic here" />
+              <p  id = "topic_title_feedback" class="invalid-feedback"></p>
             </div>
           </div>
           <div class="col-md">
@@ -57,6 +60,7 @@
               <label for="topic_details">More details *</label>
               <textarea class="form-control" name="topic_details"
                 placeholder="Write your topic in more details here"></textarea>
+              <p  id = "topic_details_feedback" class="invalid-feedback">test</p>
             </div>
           </div>
           <div class="col-md">
@@ -85,7 +89,7 @@
         </label>
       </div>
       <div>
-        <input id = "video-requests-search-box" class="form-control" type="search" placeholder="Search by the topic" />
+        <input id="video-requests-search-box" class="form-control" type="search" placeholder="Search by the topic" />
       </div>
     </div>
     <div id="listOfRequests">
