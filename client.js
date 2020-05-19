@@ -1,4 +1,15 @@
 
+let sortState = 'newFirst'
+
+function debounce(fun, delay) {
+    let timeout;
+
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fun.apply(this, args), delay);
+    };
+
+}
 
 function createVideoCard(videoReq, listOfVideoReqs, isPrepend = false) {
     const videoForm = `<div class="card mb-3">
@@ -7,10 +18,7 @@ function createVideoCard(videoReq, listOfVideoReqs, isPrepend = false) {
                         <h3>${videoReq.topic_title}</h3>
                         <p class="text-muted mb-2">${videoReq.topic_details}</p>
                         <p class="mb-0 text-muted">
-                        ${
-
-        videoReq.expected_result && `<strong>Expected results:</strong>${videoReq.expected_result}`
-        }
+                        ${videoReq.expected_result && `<strong>Expected results:</strong>${videoReq.expected_result}`}
                         </p>
                     </div>
                     <div class="d-flex flex-column text-center">
@@ -67,15 +75,15 @@ function createVideoCard(videoReq, listOfVideoReqs, isPrepend = false) {
     });
 }
 
-function renderVideoRequests(listOfVideoReqs, sortBy = "newFirst") {
-    fetch(`http://127.0.0.1:7777/video-request?sortBy=${sortBy}`).
+function renderVideoRequests(listOfVideoReqs, sortBy = "newFirst", search = "") {
+    fetch(`http://127.0.0.1:7777/video-request?sortBy=${sortBy}&search=${search}`).
         then((res) => res.json()).
         then(data => {
             listOfVideoReqs.innerHTML = "";
             data.forEach(videoReq => {
                 createVideoCard(videoReq, listOfVideoReqs);
             });
-        })
+        });
 }
 
 function sendVideoRequest(videoReqForm, listOfVideoReqs) {
@@ -88,29 +96,42 @@ function sendVideoRequest(videoReqForm, listOfVideoReqs) {
             createVideoCard(data, listOfVideoReqs, isPrepend = true)
         })
         .catch(e => console.log(e))
+}
 
+function changeActiveState(element) {
+    sortState = element.firstElementChild.value;
+    element.classList.add('active');
+    if (element.firstElementChild.value == "newFirst") {
+        document.getElementById("sort-by-top-voted").classList.remove('active')
+    }
+    else {
+        document.getElementById("sort-by-new-first").classList.remove('active')
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const listOfVideoReqs = document.getElementById("listOfRequests");
-    const videoReqForm = document.getElementById("video-request-form");
+    const listOfVideoReqsElm = document.getElementById("listOfRequests");
+    const videoReqFormElm = document.getElementById("video-request-form");
     const sortByElms = document.querySelectorAll("[id*=sort-by-]");
-    renderVideoRequests(listOfVideoReqs);
+    const searchBoxElm = document.getElementById("video-requests-search-box");
+    searchBoxElm.addEventListener("input", debounce(
+        function (e) {
+            renderVideoRequests(listOfVideoReqsElm, sortState, e.target.value);
+        },
+        400
+    ))
+    renderVideoRequests(listOfVideoReqsElm);
 
     sortByElms.forEach((element) => {
         element.addEventListener('click', function (e) {
             e.preventDefault();
-            renderVideoRequests(listOfVideoReqs, element.firstElementChild.value);
-            element.classList.add('active');
-            if (element.firstElementChild.value == "newFirst")
-                document.getElementById("sort-by-top-voted").classList.remove('active')
-            else
-                document.getElementById("sort-by-new-first").classList.remove('active')
+            renderVideoRequests(listOfVideoReqsElm, element.firstElementChild.value);
+            changeActiveState(element);
         })
     })
 
-    videoReqForm.addEventListener("submit", function (e) {
+    videoReqFormElm.addEventListener("submit", function (e) {
         e.preventDefault();
-        sendVideoRequest(videoReqForm, listOfVideoReqs);
+        sendVideoRequest(videoReqFormElm, listOfVideoReqsElm);
     })
-})
+});

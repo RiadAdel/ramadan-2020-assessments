@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Semicolon | video request</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
+  <style>
+    .form-control:focus {
+      border-color: #28a745;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+  </style>
 </head>
 
 <body>
@@ -69,13 +75,18 @@
     </div>
     <hr />
     <h1 class="mb-4">List of requested videos</h1>
-    <div class="btn-group btn-group-toggle mb-4" data-toggle="buttons">
-      <label id="sort-by-new-first" class="btn btn-success active">
-        <input type="radio" name="options"  autocomplete="off" value="newFirst"> New first
-      </label>
-      <label id="sort-by-top-voted" class="btn btn-success">
-        <input type="radio" name="options" autocomplete="off" value="topVotedFirst"> Top votted first
-      </label>
+    <div class="d-flex justify-content-between">
+      <div class="btn-group btn-group-toggle mb-4" data-toggle="buttons">
+        <label id="sort-by-new-first" class="btn btn-success active">
+          <input type="radio" name="options" autocomplete="off" value="newFirst"> New first
+        </label>
+        <label id="sort-by-top-voted" class="btn btn-success">
+          <input type="radio" name="options" autocomplete="off" value="topVotedFirst"> Top votted first
+        </label>
+      </div>
+      <div>
+        <input id = "video-requests-search-box" class="form-control" type="search" placeholder="Search by the topic" />
+      </div>
     </div>
     <div id="listOfRequests">
 
